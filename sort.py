@@ -12,6 +12,13 @@ class DrawInformation:
     SIDE_PAD = 100
     TOP_PAD = 150
     
+    GRADIENTS = [
+        (110, 110, 110),
+        (150, 150, 150),
+        (190, 190, 190)
+    ]
+    
+    
     def __init__(self, width, height, sortList):
         self.width = width
         self.height = height
@@ -20,15 +27,15 @@ class DrawInformation:
         pygame.display.set_caption("Sort Visualiser")
         
         self.set_list(sortList)
-        
-        def set_list(self, sortList):
+
+    def set_list(self, sortList):
             self.sortList = sortList
             self.minVal = min(sortList)
             self.maxVal = max(sortList)
-            self.block_width = round((self.width - selF.SIDE_PAD) / len(sortList))
-            self.block = round((self.height - self.TOP_PAD) / (self.maxVal - self.minVal))
+            self.blockWidth = round((self.width - self.SIDE_PAD) / len(sortList))
+            self.blockHeight = round((self.height - self.TOP_PAD) / (self.maxVal - self.minVal))
             
-            self.start_x = self.SIDEPAD // 2
+            self.start_x = self.SIDE_PAD // 2
 
 def generateRandomList(numElements, minVal, maxVal):
     sortList = []
@@ -37,10 +44,26 @@ def generateRandomList(numElements, minVal, maxVal):
         sortList.append(random.randint(minVal, maxVal))
     return sortList
 
+def draw(drawInformation):
+    drawInformation.window.fill(DrawInformation.BACKGROUND)
+    drawList(drawInformation)
+    pygame.display.update()
+
+def drawList(drawInformation):
+    sortList = drawInformation.sortList
+    
+    for i, val in enumerate(sortList):
+        x = drawInformation.start_x + i * drawInformation.blockWidth
+        y = drawInformation.height - (val - drawInformation.minVal) * drawInformation.blockHeight
+        
+        color = drawInformation.GRADIENTS[i % 3]
+        pygame.draw.rect(drawInformation.window, color, \
+                        (x, y, drawInformation.blockWidth, drawInformation.height))
+
+
 def main():
     run = True
     clock = pygame.time.Clock()
-    
     
     numElements = 50
     minVal = 0 
@@ -52,14 +75,19 @@ def main():
     while run:
         clock.tick(60)
         
-        pygame.display.update()
+        draw(drawInfo)
         
         for event in pygame.event.get():
-            if event == pygame.QUIT:
-                run == False
-                
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type != pygame.KEYDOWN:
+                continue 
+            
+            if event.key == pygame.K_r:
+                sortList = generateRandomList(numElements, minVal, maxVal)
+                drawInfo.set_list(sortList)
     
-    pygame.quit()
+    exit()
     
 if __name__ == "__main__":
     main()
